@@ -27,15 +27,16 @@ function init(){
   camera.position.x = 2;
   camera.lookAt(0,0,0);
 
-// creating the scene
-    scene = new THREE.Scene();
-    scene.background = new THREE.Color(0x151729);
+  // creating the scene
+  scene = new THREE.Scene();
+  scene.background = new THREE.Color(0x151729);
 
-// creating the renderer
-    renderer = new THREE.WebGLRenderer();
-    renderer.shadowMap.enabled = true;
-    renderer.setSize(window.innerWidth, window.innerHeight);
-    document.body.appendChild(renderer.domElement);
+  // creating the renderer
+  renderer = new THREE.WebGLRenderer();
+  renderer.shadowMap.enabled = true;
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  renderer.setAnimationLoop(animate);
+  document.body.appendChild(renderer.domElement);
 
   // creating the composer
   
