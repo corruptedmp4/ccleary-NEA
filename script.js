@@ -1,6 +1,18 @@
 import * as THREE from 'three';
 
-let camera, scene, renderer;
+let camera, scene, renderer, playerCube;
+
+const currentKeysPressed = {};
+
+function onKeyPress(event) {
+    currentKeysPressed[event.key] = true;
+  }
+  function onKeyUp(event) {
+    currentKeysPressed[event.key] = false;
+  }
+  
+  window.addEventListener("keydown",onKeyPress);
+  window.addEventListener("keyup",onKeyUp);
 
 // initialise function
 function init(){ 
@@ -9,8 +21,8 @@ function init(){
     const aspectRatio = window.innerWidth / window.innerHeight;
     camera = new THREE.OrthographicCamera(-aspectRatio, aspectRatio, 1, -1, 0.1, 10);
     camera.position.y = 2 * Math.tan(Math.PI / 6);
-    camera.position.z = 2;
-    camera.position.x = 2;
+    camera.position.z = -2;
+    camera.position.x = 0;
     camera.lookAt(0,0,0);
 
 // creating the scene
@@ -21,22 +33,34 @@ function init(){
     renderer = new THREE.WebGLRenderer();
     renderer.shadowMap.enabled = true;
     renderer.setSize(window.innerWidth, window.innerHeight);
+    renderer.setAnimationLoop(animate);
     document.body.appendChild(renderer.domElement);
 
 
-// test cube
-    let testCube = new THREE.Mesh(
-        new THREE.BoxGeometry(0.125,0.125,0.125),
+// player cube
+    playerCube = new THREE.Mesh(
+        new THREE.BoxGeometry(0.125,0.25,0.125),
         new THREE.MeshPhongMaterial({
             color: 0x07ffff
         })
     );
 
-    scene.add(testCube)
+    scene.add(playerCube)
     scene.add(new THREE.AmbientLight(0xffffff, 0.5))
 
-    // RENDER
-    renderer.render(scene, camera);
+
 };
 
+// animation
+function animate() {
+    renderer.render(scene, camera);
+
+    if (currentKeysPressed["w"]) {
+        playerCube.position.z += 0.001
+    }
+}
+
+
 init();
+
+
