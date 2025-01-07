@@ -1,6 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js"
-import * as SkeletonUtils from "three/addons/utils/SkeletonUtils.js"
+
 let camera, scene, renderer, playerCube, previousPlayer, previousCamera, playerCubeHealthIndicator;
 let collidableMeshList = [];
 let enemyList = [];
