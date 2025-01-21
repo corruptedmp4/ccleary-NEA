@@ -15,15 +15,12 @@
       "imports": {
         "three": "https://cdn.jsdelivr.net/npm/three@0.163.0/build/three.module.js",
         "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.163.0/examples/jsm/"
-        
       }
     }
   </script>
 
-  <div id="threejs">
-    <script type="module" , src="/script.js" style="position:absolute; top:0; left:0">
-    </script>
-  </div>
+  
+
   <div id="hotbar" class="hotbar"; style="width:400px;height:50px;position:absolute;bottom:0; background-color:rgb(36, 35, 35);justify-content:center;align-content:center;">
     <div class="inventory-slot"></div>
     <div class="inventory-slot"></div>
@@ -35,6 +32,7 @@
     <div class="inventory-slot"></div>
     <div class="inventory-slot"></div>
   </div>
+
     <div style="position:absolute; bottom:50px; left:0; width:400px; height:30px">
       <div style="width:200px;height:20px;position:absolute;bottom:10;left:0;background-color:red"></div>
       <div id="health" style="width:200px;height:20px;position:absolute;bottom:10;left:0;background-color:green"></div>
@@ -96,13 +94,17 @@
 
     <div id="build-menu" style="width:100%;height:100%;background-color:rgba(81, 72, 92, 0.454);grid-row:2/3;grid-column:1/2;">
       <div id="build-grid" class="build-grid" style="position:relative;width:100%;height:100%;justify-content:center;align-content:center;">
-        <div onclick="testFunction()" class="build-slot">cube</div>
-        <div class="build-slot">stair</div>
-        <div class="build-slot">cylinder</div>
+        <div id="cube-button" class="build-slot">cube</div>
+        <div id="stair-button" class="build-slot">stair</div>
+        <div id="cylinder-button" class="build-slot">cylinder</div>
         <div class="build-slot"></div>
         <div class="build-slot"></div>
       </div>
     </div>
+  </div>
+
+  <div id="threejs">
+    <script  type="module" , src="/barebones.js" style="position:absolute; top:0; left:0"> </script>
   </div>
   
 </body>

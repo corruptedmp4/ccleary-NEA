@@ -1,7 +1,12 @@
 import * as THREE from 'three';
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js"
 
-let camera, scene, renderer, playerCube, previousPlayer, previousCamera, playerCubeHealthIndicator;
+import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
+import { RenderPixelatedPass } from "three/addons/postprocessing/RenderPixelatedPass.js";
+import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
+
+let camera, scene, renderer, playerCube, previousPlayer, previousCamera;
+
 let collidableMeshList = [];
 let enemyList = [];
 let entityList = [];
@@ -13,33 +18,19 @@ let playerAttributes = {
     ammo: 10,
     speed: 1,
     attackDamage: 1,
-    canShoot: true
+    canShoot: true,
+    heldTile: false
 }
+
 
 let clock = new THREE.Clock();
 let delta = 0;
 let interval = 1 / 60;
 
-// let models = {
-//     player: {url: "assets/models/playermodel.glb"}
-// }
-
-// const loader = new THREE.TextureLoader();
-// const tempMaterials = [
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/left.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/right.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/top.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/bottom.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/front.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/back.png") }),
-// ];
+let composer;
 
 const gltfLoader = new GLTFLoader();
-// for (const model of Object.values(models)){
-//     gltfLoader.load(model.url, (gltf) => {
-//         model.gltf = gltf
-//     })
-// }
+
 gltfLoader.load("assets/models/playermodel.glb",
     function(gltf){
         gltf.scene.scale.set(0.0365,0.0365,0.0365)
@@ -48,77 +39,133 @@ gltfLoader.load("assets/models/playermodel.glb",
         playerCube.add(grah);
         grah.rotation.y = Math.PI/2
         grah.position.y -= 0.125;
-        
+
     }
 )
-
-// console.log(models.player)
-
-// function prepAnims(){
-//     Object.values(models).forEach( model => {
-//         const animsByName = {};
-//         model.gltf.animations.forEach((clip) => {
-//             animsByName[clip.name] = clip
-//         });
-//         model.animations = animsByName;
-//     })
-
-// }
-
-
-
-
-
-
-
-
-function loadColorTexture(path) {
-    const texture = loader.load(path);
-    texture.colorSpace = THREE.SRGBColorSpace;
-    return texture;
-}
 
 // keypress 
 const currentKeysPressed = {};
 
 // continuous
 
-window.addEventListener("keydown", onKeyPress);
-window.addEventListener("keyup", onKeyUp);
+document.getElementById("cube-button").addEventListener("click", () => {
+    console.log("cube")
+    playerAttributes.canShoot = false;
+    playerAttributes.heldTile = new tile(0,0.125,0);
+    scene.add(playerAttributes.heldTile.mesh)
+})
+
+document.getElementById("stair-button").addEventListener("click", () => {
+    console.log("stair")
+    playerAttributes.canShoot = false;
+    playerAttributes.heldTile = new slope(-0.0625,0,-0.0625);
+    scene.add(playerAttributes.heldTile.mesh)
+})
+
+document.getElementById("cylinder-button").addEventListener("click", () => {
+    console.log("cylinder")
+    playerAttributes.canShoot = false;
+    playerAttributes.heldTile = new cylinder(0,0.125,0);
+    scene.add(playerAttributes.heldTile.mesh)
+})
+
+
+
+
+
+
+// playerAttributes.heldTile = new tile(playerCube.position.x,playerCube.position.y,playerCube.position.z, 0x550555)
+
 window.addEventListener("mousedown", mouseClick);
-window.addEventListener('mousemove', (event) => {
-    mousePos = { x: event.clientX, y: event.clientY };
-});
-
-function onKeyPress(event) {
-    currentKeysPressed[event.key.toLowerCase()] = true;
-}
-function onKeyUp(event) {
-    currentKeysPressed[event.key.toLowerCase()] = false;
-}
-
-
 
 function mouseClick() {
     if(playerAttributes.ammo != 0 && playerAttributes.canShoot){
         createProjectile(playerCube);
         playerAttributes.ammo -= 1;
         document.getElementById("ammo").style.width = (playerAttributes.ammo*10 + "px");
+
+    } else if (playerAttributes.heldTile != false){
+        playerAttributes.heldTile.mesh.material.opacity = 1;
+        playerAttributes.heldTile.mesh.material.castShadow = true;
+        collidableMeshList.push(playerAttributes.heldTile.mesh)
+        playerAttributes.heldTile = false;
+
     }
 }
 
+window.addEventListener("keydown", onKeyPress);
+
+function onKeyPress(event) {
+    currentKeysPressed[event.key.toLowerCase()] = true;
+}
+
+window.addEventListener("keyup", onKeyUp);
+
+function onKeyUp(event) {
+    currentKeysPressed[event.key.toLowerCase()] = false;
+}
+
+window.addEventListener('mousemove', (event) => {
+    mousePos = { x: event.clientX, y: event.clientY };
+});
+
 class tile {
-    constructor(x, y, z, texture) {
-        let tile = new THREE.Mesh(
+    constructor(x, y, z) {
+        this.mesh = new THREE.Mesh(
             new THREE.BoxGeometry(0.25, 0.25, 0.25),
             new THREE.MeshPhongMaterial({
-                color: texture
+                color: 0xffffff,
+                transparent: true,
+                opacity: 0.7
             })
         )
-        tile.rotation.y = Math.PI / 4;
-        tile.position.set(x, y, z)
-        collidableMeshList.push(tile)
-        scene.add(tile);
+        this.mesh.rotation.y = Math.PI / 4;
+        this.mesh.position.set(x, y, z)
+    }
+}
+
+class slope {
+    constructor(x,y,z){
+        let shape = new THREE.Shape();
+        shape.moveTo(0,0);
+        shape.lineTo(0,0.25);
+        shape.lineTo(0.25,0);
+        shape.lineTo(0,0);
+        shape.moveTo(0,0)
+        let geometry = new THREE.ExtrudeGeometry(shape, 
+            {depth: 0.25, bevelEnabled: false}
+        );
+        this.mesh = new THREE.Mesh(
+            geometry,
+            new THREE.MeshPhongMaterial({
+                color:0xffffff,
+                transparent: true,
+                opacity: 0.7
+            })
+        );
+        this.mesh.position.set(x,y,z);
+        // this.mesh.scale.set(0.25,0.25,0.25)
+        this.mesh.rotation.y = (Math.PI/4)
+    }
+}
+
+class cylinder {
+    constructor(x,y,z){
+        this.mesh = new THREE.Mesh(
+            new THREE.CylinderGeometry(
+                0.125, // radtop
+                0.125, // radbot
+                0.25, // height
+                8      // rad segments
+            ),
+            new THREE.MeshPhongMaterial({
+                color:0xffffff,
+                transparent: true,
+                opacity: 0.7
+            })
+        );
+        this.mesh.position.set(x,y,z);
+        this.mesh.rotation.y = (Math.PI/4)
     }
 }
 
@@ -189,6 +236,13 @@ function init() {
     renderer.setAnimationLoop(animate);
     document.body.appendChild(renderer.domElement);
 
+    composer = new EffectComposer(renderer);
+    let renderPixelatedPass = new RenderPixelatedPass(6,scene,camera);
+    composer.addPass(renderPixelatedPass);
+    let outputPass = new OutputPass();
+    composer.addPass(outputPass);
+    renderPixelatedPass.setPixelSize(2);
+
 
     // player cube
     playerCube = new THREE.Mesh(
@@ -197,21 +251,10 @@ function init() {
             color: 0x07ffff,
             transparent: true,
             opacity: 0})
-        // tempMaterials
     );
     playerCube.castShadow = false;
     playerCube.position.y += 0.125
     scene.add(playerCube);
-
-    playerCubeHealthIndicator = new THREE.Mesh(
-        new THREE.BoxGeometry(0.125, 0.25, 0.125),
-        new THREE.MeshPhongMaterial({
-            color: 0xff2200,
-            transparent: true,
-            opacity: 0
-        })
-    );
-    playerCube.add(playerCubeHealthIndicator)
 
     // plane
     let planeMesh = new THREE.Mesh(
@@ -278,6 +321,29 @@ function mouseStuff() {
         //console.log((Math.atan(betterMouseX/betterMouseY))*(180/Math.PI) + 360);
         playerCube.rotation.y = -(Math.atan(betterMouseX / betterMouseY)) + 2 * Math.PI;
     }
+
+    //
+
+    if(playerAttributes.heldTile != false){
+        let vector = new THREE.Vector3();
+        vector.set(
+            (mousePos.x / window.innerWidth) * 2 -1,
+            -(mousePos.y / window.innerHeight) * 2 + 2,
+            0
+            // WHAT THE ACTUAL FUCK
+        )
+
+        vector.unproject(camera)
+
+        playerAttributes.heldTile.mesh.position.x = (vector.x)
+        playerAttributes.heldTile.mesh.position.z = ((vector.y*2)+0.75+playerCube.position.z)
+        console.log("heldtile: ",playerAttributes.heldTile.mesh.position)
+        
+    }
+
+
+
+    //
 }
 
 // movement
@@ -291,6 +357,7 @@ function movement(currentKeysPressed) {
         }
         playerCube.position.z = Math.round( (playerCube.position.z + 0.005)*1000 )/1000
         camera.position.z = Math.round( (camera.position.z + 0.005)*1000 )/1000
+
     }
     if (currentKeysPressed["s"]) {
         if(!justCheckCollisions()){
@@ -333,7 +400,9 @@ function movement(currentKeysPressed) {
     }
 
     if (currentKeysPressed["t"]) {
-        new tile(0, 0.125, 0, 0x00ff00);
+        let tempObject = new tile(0, 0.125, 0, 0x00ff00)
+        collidableMeshList.push(tempObject.mesh)
+        scene.add(tempObject.mesh)
     }
 }
 
@@ -437,7 +506,6 @@ function checkEnemyHit() {
             let collisionResults = ray.intersectObjects(projectileList);
             if (collisionResults.length > 0 && collisionResults[0].distance < directionVector.length()) {
                 scene.remove(enemyList[i])
-
                 enemyList.splice(i, 1);
             }
         }
@@ -456,16 +524,15 @@ function animate() {
             projectileList[i].position.z += projectileList[i].deltaZ;
         }
         delta %= interval;
-        renderer.render(scene, camera);
+        composer.render(scene, camera);
     }
 }
 
 /* trash heap VVVVVVVV
-           
 
 
-                scene.remove(collisionResults[0]);
-// playerCubeHealthIndicator.material.opacity = ((1 / playerAttributes.health)) * 10;
+
+
 */
 
 init();
