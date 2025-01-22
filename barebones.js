@@ -1,7 +1,6 @@
 import * as THREE from 'three';
 import {GLTFLoader} from "three/addons/loaders/GLTFLoader.js"
 
-
 let manager = new THREE.LoadingManager();
 manager.onLoad = init;
 
@@ -14,6 +13,9 @@ let models = {
     rocks: {url:"/assets/models/rocks.glb"},
     turret: {url:"/assets/models/turret.glb"},
 }
+
+let worldObjects = [];
+let worldObjectCounter = 0;
 
 for (let model of Object.values(models)) {
     gltfLoader.load(model.url, (gltf) => {
@@ -59,14 +61,28 @@ function init() {
     let target = spotLight.target;
     target.position.set(0, 0, 0);
     scene.add(spotLight)
-    scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+    scene.add(new THREE.AmbientLight(0xffffff, 1));
 
-    // console.log(models.baseTile)
-    // scene.add(models.baseTile.gltf.scene)
-
-    for (let xPos = 0; xPos < 10; xPos++){
-        scene.add((new gltfObject("baseTile",xPos,0,0)).mesh) // why doesnt this work
+    for(let xPos = 0; xPos < 10; xPos++){
+        for(let zPos = 0; zPos < 10; zPos++){
+            worldObjects[worldObjectCounter] = new gltfObject("baseTile",0.175*xPos,0,0.175*zPos)
+            scene.add(worldObjects[worldObjectCounter].mesh)
+            worldObjectCounter++
+        }
     }
+    
+
+
+
+    // worldObjects[worldObjectCounter] = new gltfObject("baseTile",0,0,0)
+    // scene.add(worldObjects[worldObjectCounter].mesh)
+    // worldObjectCounter++
+    // worldObjects[worldObjectCounter] = new gltfObject("baseTile",0.175,0,0.175)
+    // scene.add(worldObjects[worldObjectCounter].mesh)
+    // worldObjectCounter++
+    // worldObjects[worldObjectCounter] = new gltfObject("baseTile",0,0,0.35)
+    // scene.add(worldObjects[worldObjectCounter].mesh)
+    // console.log(worldObjects)
     
     
 
@@ -88,7 +104,7 @@ function animate() {
 
 class gltfObject{
     constructor(tile,x,y,z){
-        this.mesh = models[tile].gltf.scene;
+        this.mesh = models[tile].gltf.scene.clone();
         this.mesh.rotation.y = Math.PI/4;
         this.mesh.position.set(x,y,z);
         this.mesh.scale.set(0.25,0.25,0.25);
