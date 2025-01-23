@@ -527,14 +527,14 @@ function threeDCursorStuff() {
       collisionResults[0].distance < directionVector.length()
     ) {
       let intersectedObject = collisionResults[0].object;
-      intersectedObject.material = intersectedObject.material.clone();
+      if (!intersectedObject.hasMaterialBeenCloned) {
+        intersectedObject.material = intersectedObject.material.clone();
+        intersectedObject.hasMaterialBeenCloned = true;
+      }
       intersectedObject.material.color.set(0xff0000);
       //collisionResults[0].object.material.color.set(0xff0000); // issue related to creating as gltfObject
       // console.log(collisionResults)
       // console.log(worldObjects.length)
-    }
-    else{
-        
     }
   }
 }
