@@ -5,7 +5,7 @@ import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPixelatedPass } from "three/addons/postprocessing/RenderPixelatedPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
 
-let camera, scene, renderer, playerCube, previousPlayer, previousCamera;
+let camera, scene, renderer, playerCube, previousPlayer, previousCamera, threeDCursor;
 
 let collidableMeshList = [];
 let enemyList = [];
@@ -22,26 +22,37 @@ let playerAttributes = {
     heldTile: false
 }
 
-
 let clock = new THREE.Clock();
 let delta = 0;
 let interval = 1 / 60;
 
 let composer;
 
-const gltfLoader = new GLTFLoader();
+let worldObjects = [];
+let worldObjectCounter = 0;
 
-gltfLoader.load("assets/models/playermodel.glb",
-    function(gltf){
-        gltf.scene.scale.set(0.0365,0.0365,0.0365)
-        let grah = gltf.scene
-        
-        playerCube.add(grah);
-        grah.rotation.y = Math.PI/2
-        grah.position.y -= 0.125;
+let models = {
+    baseTile: {url:"/assets/models/baseTile.glb"},
+    tree: {url:"/assets/models/tree.glb"},
+    twoTree: {url:"/assets/models/twoTree.glb"},
+    rocks: {url:"/assets/models/rocks.glb"},
+    turret: {url:"/assets/models/turret.glb"},
+    playerModel: {url:"/assets/models/playermodel.glb"},
+    toaster: {url:"/assets/models/toaster.glb"}
+}
 
-    }
-)
+let manager = new THREE.LoadingManager();
+manager.onLoad = init;
+
+let gltfLoader = new GLTFLoader(manager);
+
+for (let model of Object.values(models)) {
+    gltfLoader.load(model.url, (gltf) => {
+        model.gltf = gltf;
+        // console.log(model.gltf)
+    })
+}
+
 
 // keypress 
 const currentKeysPressed = {};
@@ -88,6 +99,8 @@ function mouseClick() {
         playerAttributes.heldTile.mesh.material.opacity = 1;
         playerAttributes.heldTile.mesh.material.castShadow = true;
         collidableMeshList.push(playerAttributes.heldTile.mesh)
+
+        playerAttributes.canShoot = true;
         playerAttributes.heldTile = false;
 
     }
@@ -116,7 +129,7 @@ class tile {
             new THREE.MeshPhongMaterial({
                 color: 0xffffff,
                 transparent: true,
-                opacity: 0.7
+                opacity: 0.4
             })
         )
         this.mesh.rotation.y = Math.PI / 4;
@@ -186,6 +199,36 @@ class entity {
     }
 }
 
+class gltfObject{
+    constructor(tile,x,y,z){
+        this.mesh = models[tile].gltf.scene.clone();
+
+        if(tile == "rocks"){
+            let bTile = models.baseTile.gltf.scene.clone()
+            bTile.position.y -= 0.2
+            y += 0.1
+            
+            this.mesh.add(bTile)
+
+
+        } else if(tile == "tree"){
+            let bTile = models.baseTile.gltf.scene.clone()
+            bTile.position.y -= 0.2
+            y += 0.1
+            
+            this.mesh.add(bTile)
+            
+        } else if(tile == "twoTree"){
+            y -= 0.0001
+        }
+
+        this.mesh.rotation.y += Math.PI/4;
+        this.mesh.position.set(x,y-0.1,z);
+        this.mesh.scale.set(0.25,0.5,0.25);
+    }
+}
+
+
 function createProjectile(parentObj) {
 
     let proj = new THREE.Mesh(
@@ -253,26 +296,38 @@ function init() {
             opacity: 0})
     );
     playerCube.castShadow = false;
-    playerCube.position.y += 0.125
     scene.add(playerCube);
+    
 
-    // plane
-    let planeMesh = new THREE.Mesh(
-        new THREE.PlaneGeometry(2, 2),
+    playerCube.position.y += 0.125
+
+    
+    let playerModel = models.playerModel.gltf.scene;
+    console.log(playerModel)
+
+
+    playerCube.add(playerModel)
+    playerModel.scale.set(0.0365,0.0365,0.0365);
+    playerModel.rotation.y = Math.PI/2
+    playerModel.position.y = -0.125
+
+
+    threeDCursor = new THREE.Mesh(
+        new THREE.BoxGeometry(0.01, 0.15, 0.1),
         new THREE.MeshPhongMaterial({
-            color: 0x00dd99
+            color:0xffffff,
+            transparent:true,
+            opacity:0.2
         })
-    );
-    planeMesh.receiveShadow = true;
-    planeMesh.position.set(0, 0, 0);
-    planeMesh.rotation.x = -Math.PI / 2;
-    planeMesh.rotation.z = Math.PI / 4
+    )
+    threeDCursor.position.y = 0.125;
 
-    scene.add(planeMesh);
+    scene.add(threeDCursor)
+
 
     // spotlight
-    let spotLight = new THREE.SpotLight(0xffc100, 10, 10, Math.PI / 16, 0.02, 2);
-    spotLight.position.set(2, 2, 0);
+    let spotLight = new THREE.SpotLight(0xffc100, 10, 10, Math.PI / 2, 0.02, 2);
+    spotLight.position.set(1, 2, 0);
     spotLight.castShadow = true;
 
     let target = spotLight.target;
@@ -282,18 +337,68 @@ function init() {
 
     scene.add(new THREE.AmbientLight(0xffffff, 0.5));
 
-    // prepAnims();
-    // Object.values(models).forEach((model, ndx) => {
-    //     const clonedScene = SkeletonUtils.clone(model.gltf.scene);
-    //     const root = new THREE.Object3D();
-    //     root.add(clonedScene);
-    //     scene.add(root);
-    //     root.position.x = (ndx - 3) * 3;
-    //   });
+
+
+    for(let xPos = -5; xPos < 5; xPos++){
+        for(let zPos = -5; zPos < 5; zPos++){
+            let randObj = randomObject()
+            worldObjects[worldObjectCounter] = new gltfObject(randObj,(0.35*xPos),0,0.35*zPos).mesh
+            scene.add(worldObjects[worldObjectCounter])
+            // collidableMeshList.push(worldObjects[worldObjectCounter].mesh)
+            worldObjectCounter++
+        }
+    }
+
+
+
+
+    for(let xPos = -5; xPos < 5; xPos++){
+        for(let zPos = -5; zPos < 5; zPos++){
+            worldObjects[worldObjectCounter] = new gltfObject(randomObject(),(0.35*xPos)+0.175,0,(0.35*zPos)+0.175).mesh
+            scene.add(worldObjects[worldObjectCounter])
+            worldObjectCounter++
+        }
+    }
+
+
+
+
+
+    let toaster = new gltfObject("toaster",0,0,0).mesh
+    toaster.scale.set(1,1,1)
+    toaster.position.y += 0.15
+    toaster.rotation.y += Math.PI/4
+    toaster.position.x += 0.15;
+    playerCube.add(toaster)
+
+
+
+
+
+    //
+    let tempRock;
+    tempRock = models["rocks"].gltf.scene.clone();
+
+    tempRock.rotation.y += Math.PI/4;
+    tempRock.position.set(0,0.5,0);
+    tempRock.scale.set(0.25,0.5,0.25);
+
+    scene.add(tempRock)
+
+
+
+
+
+
+
+
+    //
+
+
+
 
     animate()
-};
-
+};2
 // animation
 
 // this all needs documenting
@@ -321,24 +426,12 @@ function mouseStuff() {
         //console.log((Math.atan(betterMouseX/betterMouseY))*(180/Math.PI) + 360);
         playerCube.rotation.y = -(Math.atan(betterMouseX / betterMouseY)) + 2 * Math.PI;
     }
-
-    //
+        threeDCursorStuff();
 
     if(playerAttributes.heldTile != false){
-        let vector = new THREE.Vector3();
-        vector.set(
-            (mousePos.x / window.innerWidth) * 2 -1,
-            -(mousePos.y / window.innerHeight) * 2 + 2,
-            0
-            // WHAT THE ACTUAL FUCK
-        )
-
-        vector.unproject(camera)
-
-        playerAttributes.heldTile.mesh.position.x = (vector.x)
-        playerAttributes.heldTile.mesh.position.z = ((vector.y*2)+0.75+playerCube.position.z)
-        console.log("heldtile: ",playerAttributes.heldTile.mesh.position)
-        
+        playerAttributes.heldTile.mesh.position.x = Math.round((threeDCursor.position.x/17.5*100))/100*17.5
+        playerAttributes.heldTile.mesh.position.z = Math.round((threeDCursor.position.z/17.5*100))/100*17.5
+        console.log(playerAttributes.heldTile.mesh.position)        
     }
 
 
@@ -405,6 +498,65 @@ function movement(currentKeysPressed) {
         scene.add(tempObject.mesh)
     }
 }
+
+
+
+
+
+
+
+
+
+
+
+function threeDCursorStuff(){
+    let vector = new THREE.Vector3();
+    vector.set(
+        (mousePos.x / window.innerWidth) * 2 -1,
+        -(mousePos.y / window.innerHeight) * 2 + 2,
+        0
+        // WHAT THE ACTUAL FUCK
+    )
+
+    vector.unproject(camera)
+
+    // console.log("collidables: ",collidableMeshList[0]);
+    // console.log("worldObj: ",worldObjects[0])
+
+    threeDCursor.position.x = (vector.x)
+    threeDCursor.position.z = ((vector.y*2)+0.75+playerCube.position.z)
+
+
+
+
+    for (let vertexIndex = 0; vertexIndex < threeDCursor.geometry.attributes.position.array.length; vertexIndex++){       
+        let localVertex = new THREE.Vector3().fromBufferAttribute(threeDCursor.geometry.attributes.position, vertexIndex).clone();
+        let globalVertex = localVertex.applyMatrix4(threeDCursor.matrix);
+        let directionVector = globalVertex.sub( threeDCursor.position );
+    
+        let ray = new THREE.Raycaster( threeDCursor.position, directionVector.clone().normalize() );
+        let collisionResults = ray.intersectObjects( worldObjects );
+        if ( collisionResults.length > 0 && collisionResults[0].distance < directionVector.length() ) 
+        {
+
+            collisionResults[0].object.material.color.set(0xff0000) // issue related to creating as gltfObject
+            // console.log(collisionResults)
+            // console.log(worldObjects.length)
+            
+        }
+    }
+
+
+
+
+
+
+
+}
+
+
+
+
 
 function resetCollisionCheck(){
     let shitCube = playerCube.clone();
@@ -528,6 +680,23 @@ function animate() {
     }
 }
 
+function randomObject(){
+    let randNum = Math.floor(Math.random()*15);
+    let tile;
+
+    if(randNum == 0){
+        tile = "tree"
+    } else if (randNum == 1){
+        tile = "twoTree"
+    } else if (randNum == 2){
+        tile = "rocks"
+    } else {
+        tile = "baseTile"
+    }
+    return tile;
+}
+
+
 /* trash heap VVVVVVVV
 
 
@@ -535,4 +704,32 @@ function animate() {
 
 */
 
-init();
+
+// EXPORT 
+/*
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    
+
+
+
+
+
+*/
+
+
+
+
