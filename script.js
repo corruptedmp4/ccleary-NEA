@@ -21,7 +21,12 @@ let worldObjects = [];
 
 let worldObjectCounter = 0;
 
+let worldObjects = [];
+
+let worldObjectCounter = 0;
+
 let mousePos = { x: undefined, y: undefined };
+
 
 let playerAttributes = {
   health: 100,
@@ -31,6 +36,22 @@ let playerAttributes = {
   attackDamage: 1,
   canShoot: true,
   heldTile: false,
+  selectedTile: null,
+  buildMenu: {
+    open: false,
+    reset: true,
+  },
+  inventory: {
+    contents: [
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+    ],
+    open: false,
+    reset: true,
+  }
   selectedTile: null,
   buildMenu: {
     open: false,
@@ -107,9 +128,6 @@ document.getElementById("cylinder-button").addEventListener("click", () => {
 window.addEventListener("mousedown", mouseClick);
 
 function mouseClick() { // written up
-
-
-
 
 
   if (playerAttributes.ammo != 0 && playerAttributes.canShoot) {
