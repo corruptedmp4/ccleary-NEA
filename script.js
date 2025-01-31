@@ -6,15 +6,58 @@ let collidableMeshList = [];
 let enemyList = [];
 let entityList = [];
 let projectileList = [];
+let worldObjects = [];
+
+let worldObjectCounter = 0;
+
+let worldObjects = [];
+
+let worldObjectCounter = 0;
+
 let mousePos = { x: undefined, y: undefined };
+
+
 let playerAttributes = {
-    health: 100,
-    stamina: 100,
-    ammo: 10,
-    speed: 1,
-    attackDamage: 1,
-    canShoot: true
-}
+  health: 100,
+  stamina: 100,
+  ammo: 10,
+  speed: 1,
+  attackDamage: 1,
+  canShoot: true,
+  heldTile: false,
+  selectedTile: null,
+  buildMenu: {
+    open: false,
+    reset: true,
+  },
+  inventory: {
+    contents: [
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+    ],
+    open: false,
+    reset: true,
+  }
+  selectedTile: null,
+  buildMenu: {
+    open: false,
+    reset: true,
+  },
+  inventory: {
+    contents: [
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+    ],
+    open: false,
+    reset: true,
+  }
+};
 
 let clock = new THREE.Clock();
 let delta = 0;
@@ -86,9 +129,30 @@ const currentKeysPressed = {};
 window.addEventListener("keydown", onKeyPress);
 window.addEventListener("keyup", onKeyUp);
 window.addEventListener("mousedown", mouseClick);
-window.addEventListener('mousemove', (event) => {
-    mousePos = { x: event.clientX, y: event.clientY };
-});
+
+function mouseClick() { // written up
+
+
+
+
+
+  if (playerAttributes.ammo != 0 && playerAttributes.canShoot) {
+    createProjectile(playerCube);
+    playerAttributes.ammo -= 1;
+    document.getElementById("ammo").style.width =
+      playerAttributes.ammo * 10 + "px";
+  } else if (playerAttributes.heldTile != false) {
+    playerAttributes.heldTile.mesh.material.opacity = 1;
+    playerAttributes.heldTile.mesh.material.castShadow = true;
+    collidableMeshList.push(playerAttributes.heldTile.mesh);
+    worldObjects.push(playerAttributes.heldTile.mesh)
+
+    playerAttributes.canShoot = true;
+    playerAttributes.heldTile = false;
+  }
+}
+
+window.addEventListener("keydown", onKeyPress);
 
 function onKeyPress(event) {
     currentKeysPressed[event.key.toLowerCase()] = true;
