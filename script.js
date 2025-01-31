@@ -352,6 +352,414 @@ function movement(currentKeysPressed) {
             previousPlayer = playerCube.clone();
             previousCamera = camera.clone();
 
+<<<<<<< HEAD
+=======
+  if (currentKeysPressed["r"]) { // written up
+    playerAttributes.canShoot = false;
+    setTimeout(function () {
+      playerAttributes.ammo = 10;
+      document.getElementById("ammo").style.width =
+        playerAttributes.ammo * 10 + "px";
+      playerAttributes.canShoot = true;
+    }, 1500);
+  }
+
+  if(currentKeysPressed["e"]){ // written up
+    inventoryManagement()
+  } else if (!currentKeysPressed["e"]){
+    playerAttributes.inventory.reset = true;
+  }
+
+  if (currentKeysPressed["t"]) {
+  }
+
+  if (currentKeysPressed["x"]) { // written up
+    if (playerAttributes.selectedTile != null && !playerAttributes.heldTile && playerAttributes.buildMenu.open) {
+      harvest();
+      playerAttributes.selectedTile.scale.set(0, 0, 0)
+      playerAttributes.selectedTile = null;
+    }
+  }
+
+  if (currentKeysPressed["b"]) { // written up
+    if (playerAttributes.buildMenu.reset == true && playerAttributes.buildMenu.open == true){
+      playerAttributes.buildMenu.open = false;
+      playerAttributes.buildMenu.reset = false;
+
+      let bMenu = document.getElementById("build-menu");
+      playerAttributes.canShoot = true;
+      tileColourReset()
+      playerAttributes.selectedTile = null;
+      bMenu.style.visibility = "hidden";
+      threeDCursor.scale.set(0, 0, 0)
+
+    } else if (playerAttributes.buildMenu.reset == true && playerAttributes.buildMenu.open == false){
+      playerAttributes.buildMenu.open = true;
+      playerAttributes.buildMenu.reset = false
+
+      let bMenu = document.getElementById("build-menu");
+      playerAttributes.canShoot = false;
+      bMenu.style.visibility = "visible";
+      threeDCursor.scale.set(1, 1, 1)
+
+    }
+
+  } else if (!currentKeysPressed["b"]){
+    playerAttributes.buildMenu.reset = true;
+  }
+
+}
+
+/*
+    if (playerAttributes.buildMenu) {
+      playerAttributes.buildMenu = false;
+    }
+    let bMenu = document.getElementById("build-menu");
+    playerAttributes.buildMenu = true;
+*/
+
+
+
+function threeDCursorStuff() { // written up
+  let vector = new THREE.Vector3();
+  vector.set(
+    (mousePos.x / window.innerWidth) * 2 - 1,
+    -(mousePos.y / window.innerHeight) * 2 + 2,
+    0
+    // WHAT THE ACTUAL FUCK
+  );
+
+  vector.unproject(camera);
+
+  // console.log("collidables: ",collidableMeshList[0]);
+  // console.log("worldObj: ",worldObjects[0])
+
+  threeDCursor.position.x = vector.x;
+  threeDCursor.position.z = vector.y * 2 + 0.75 + playerCube.position.z;
+
+  for (
+    let vertexIndex = 0;
+    vertexIndex < threeDCursor.geometry.attributes.position.array.length;
+    vertexIndex++
+  ) {
+    let localVertex = new THREE.Vector3()
+      .fromBufferAttribute(
+        threeDCursor.geometry.attributes.position,
+        vertexIndex
+      )
+      .clone();
+    let globalVertex = localVertex.applyMatrix4(threeDCursor.matrix);
+    let directionVector = globalVertex.sub(threeDCursor.position);
+
+    let ray = new THREE.Raycaster(
+      threeDCursor.position,
+      directionVector.clone().normalize()
+    );
+    let collisionResults = ray.intersectObjects(worldObjects);
+    if (
+      collisionResults.length > 0 &&
+      collisionResults[0].distance < directionVector.length()
+    ) {
+      let intersectedObject = collisionResults[0].object;
+      if (!intersectedObject.hasMaterialBeenCloned) {
+
+        intersectedObject.material = intersectedObject.material.clone();
+        intersectedObject.hasMaterialBeenCloned = true;
+      }
+
+      if (playerAttributes.selectedTile != null) {
+        // console.log(" CRAWLLLLLINNGGG INNNNNN MY SKINNNNNN",playerAttributes.selectedTile.material.color)
+        // playerAttributes.selectedTile.material.color.set(0xffffff);
+
+        tileColourReset();
+      }
+
+      //   intersectedObject.material.color.set(0xff0000);
+      playerAttributes.selectedTile = intersectedObject;
+      intersectedObject.material.color.set(0xff0000)
+    }
+  }
+}
+
+function resetCollisionCheck() { // written up
+  let shitCube = playerCube.clone();
+  for (
+    let vertexIndex = 0;
+    vertexIndex < shitCube.geometry.attributes.position.array.length;
+    vertexIndex++
+  ) {
+    let localVertex = new THREE.Vector3()
+      .fromBufferAttribute(shitCube.geometry.attributes.position, vertexIndex)
+      .clone();
+    let globalVertex = localVertex.applyMatrix4(shitCube.matrix);
+    let directionVector = globalVertex.sub(shitCube.position);
+
+    let ray = new THREE.Raycaster(
+      shitCube.position,
+      directionVector.clone().normalize()
+    );
+    let collisionResults = ray.intersectObjects(collidableMeshList);
+    if (
+      collisionResults.length > 0 &&
+      collisionResults[0].distance < directionVector.length()
+    ) {
+      playerCube.position.x = previousPlayer.position.x;
+      playerCube.position.y = previousPlayer.position.y;
+      playerCube.position.z = previousPlayer.position.z;
+
+      camera.position.x = previousCamera.position.x;
+      camera.position.y = previousCamera.position.y;
+      camera.position.z = previousCamera.position.z;
+
+      // just need to make the x,y,z resets independent! thats it! then im done!
+    }
+  }
+}
+
+function justCheckCollisions() { // written up
+  let shitCube = playerCube.clone();
+  for (
+    let vertexIndex = 0;
+    vertexIndex < shitCube.geometry.attributes.position.array.length;
+    vertexIndex++
+  ) {
+    let localVertex = new THREE.Vector3()
+      .fromBufferAttribute(shitCube.geometry.attributes.position, vertexIndex)
+      .clone();
+    let globalVertex = localVertex.applyMatrix4(shitCube.matrix);
+    let directionVector = globalVertex.sub(shitCube.position);
+
+    let ray = new THREE.Raycaster(
+      shitCube.position,
+      directionVector.clone().normalize()
+    );
+    let collisionResults = ray.intersectObjects(collidableMeshList);
+    if (
+      collisionResults.length > 0 &&
+      collisionResults[0].distance < directionVector.length()
+    ) {
+      return true;
+    }
+  }
+}
+
+function enemyManagement() { // written up
+  for (let i = 0; i < enemyList.length; i++) {
+    let attack1 = false;
+    let attack2 = false;
+
+    // move towards
+
+    if (playerCube.position.x > enemyList[i].position.x) {
+      if (playerCube.position.x - (enemyList[i].position.x + 0.1) > 0) {
+        enemyList[i].position.x += 0.0015 + Math.floor((Math.random()-0.5)*180)/10000;
+      } else {
+        attack1 = true;
+      }
+    } else {
+      if (enemyList[i].position.x - (playerCube.position.x + 0.1) > 0) {
+        enemyList[i].position.x -= 0.0015 + Math.floor((Math.random()-0.5)*180)/10000;
+      } else {
+        attack1 = true;
+      }
+    }
+    if (playerCube.position.z > enemyList[i].position.z) {
+      if (playerCube.position.z - (enemyList[i].position.z + 0.1) > 0) {
+        enemyList[i].position.z += 0.0015 + Math.floor((Math.random()-0.5)*180)/10000;
+      } else {
+        attack2 = true;
+      }
+    } else {
+      if (enemyList[i].position.z - (playerCube.position.z + 0.1) > 0) {
+        enemyList[i].position.z -= 0.0015 + Math.floor((Math.random()-0.5)*60)/10000;
+      } else {
+        attack2 = true;
+      }
+    }
+    if (attack1 && attack2) {
+      if (playerAttributes.health > 0) {
+        playerAttributes.health -= 0.1;
+        playerAttributes.health = Math.floor(playerAttributes.health * 10) / 10;
+        document.getElementById("health").style.width =
+          playerAttributes.health * 2 + "px";
+      }
+    }
+  }
+  checkEnemyHit();
+}
+
+function checkEnemyHit() { // written up
+  for (let i = 0; i < enemyList.length; i++) {
+    for (
+      let j = 0;
+      j < enemyList[i]?.geometry.attributes.position.array.length;
+      j++
+    ) {
+      let localVertex = new THREE.Vector3()
+        .fromBufferAttribute(enemyList[i].geometry.attributes.position, j)
+        .clone();
+      let globalVertex = localVertex.applyMatrix4(enemyList[i].matrix);
+      let directionVector = globalVertex.sub(enemyList[i].position);
+
+      let ray = new THREE.Raycaster(
+        enemyList[i].position,
+        directionVector.clone().normalize()
+      );
+      let collisionResults = ray.intersectObjects(projectileList);
+      if (
+        collisionResults.length > 0 &&
+        collisionResults[0].distance < directionVector.length()
+      ) {
+        scene.remove(enemyList[i]);
+        enemyList.splice(i, 1);
+      }
+    }
+  }
+}
+//
+
+function animate() { // written up
+  delta += clock.getDelta();
+  if (delta > interval) {
+    resetCollisionCheck();
+    movement(currentKeysPressed);
+    mouseStuff();
+    enemyManagement();
+    for (let i = 0; i < projectileList.length; i++) {
+      projectileList[i].position.x += projectileList[i].deltaX;
+      projectileList[i].position.z += projectileList[i].deltaZ;
+    }
+    delta %= interval;
+    composer.render(scene, camera);
+  }
+}
+
+function randomObject() { // written up
+  let randNum = Math.floor(Math.random() * 15);
+  let tile;
+
+  if (randNum == 0) {
+    tile = "tree";
+  } else if (randNum == 1) {
+    tile = "twoTree";
+  } else if (randNum == 2) {
+    tile = "rocks";
+  } else {
+    tile = "baseTile";
+  }
+  return tile;
+}
+
+function tileColourReset() { // written up
+  if (playerAttributes.selectedTile != null) {
+    if (playerAttributes.selectedTile.name == "Mesh_tree") {
+      playerAttributes.selectedTile.material.color.set(0x8ddbc4)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_1") {
+      playerAttributes.selectedTile.material.color.set(0xf1c1a2)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_2") {
+      playerAttributes.selectedTile.material.color.set(0x8ddbc4)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_3") {
+      playerAttributes.selectedTile.material.color.set(0xf1c1a2)
+
+    } else if (playerAttributes.selectedTile.name == "detail_rocks") {
+      playerAttributes.selectedTile.material.color.set(0xd4edf2)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree") {
+      playerAttributes.selectedTile.material.color.set(0x8ddbc4)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree_1") {
+      playerAttributes.selectedTile.material.color.set(0xf1c1a2)
+
+    } else {
+      playerAttributes.selectedTile.material.color.set(0xffffff)
+    }
+
+  }
+
+}
+
+
+
+// harvesting
+function harvest() { // written up
+  if (playerAttributes.selectedTile != null) {
+    if (playerAttributes.selectedTile.name == "Mesh_tree") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_1") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_2") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_3") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "detail_rocks") {
+      inventoryAdd(["rock",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree_1") {
+      inventoryAdd(["wood",1])
+
+    }
+  }
+}
+
+function inventoryManagement(){ // written up
+  let pInv = playerAttributes.inventory
+
+  if(pInv.reset == true && pInv.open == true){
+    pInv.open = false;
+    pInv.reset = false;
+    document.getElementById("inventory-container").style.visibility = "hidden";
+
+  } else if(pInv.reset == true && pInv.open == false){
+    pInv.open = true;
+    pInv.reset = false;
+
+    for(let i = 0; i < pInv.contents.length; i++){
+      if(i != undefined){
+        document.getElementById("slot-"+i).innerHTML = pInv.contents[i];
+      } else {
+        document.getElementById("slot-"+i).innerHTML = "_";
+      }
+    }
+
+    document.getElementById("inventory-container").style.visibility = "visible"
+  }
+
+
+}
+
+
+function inventoryAdd(input){ // written up
+  let pInv = playerAttributes.inventory.contents;
+  let noSlotFound = true;
+  let i = 0;
+
+  while(noSlotFound){
+    if(pInv[i][0] != undefined){
+      if(pInv[i][0] == input[0]){
+        pInv[i][1] += input[1];
+        noSlotFound = false;
+      }
+    }
+    i++
+    if (i == pInv.length){
+      
+      for(let i = 0; i < pInv.length; i++){
+        
+        if(pInv[i][0] == undefined){
+          pInv[i] = input;
+          noSlotFound = false;
+          i = pInv.length
+>>>>>>> 8997199 (snap building, object harvesting, inventory, etc.)
         }
         playerCube.position.z = Math.round( (playerCube.position.z + 0.005)*1000 )/1000
         camera.position.z = Math.round( (camera.position.z + 0.005)*1000 )/1000
