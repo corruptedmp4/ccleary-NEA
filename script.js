@@ -17,7 +17,12 @@ let collidableMeshList = [];
 let enemyList = [];
 let entityList = [];
 let projectileList = [];
+let worldObjects = [];
+
+let worldObjectCounter = 0;
+
 let mousePos = { x: undefined, y: undefined };
+
 let playerAttributes = {
   health: 100,
   stamina: 100,
@@ -26,6 +31,22 @@ let playerAttributes = {
   attackDamage: 1,
   canShoot: true,
   heldTile: false,
+  selectedTile: null,
+  buildMenu: {
+    open: false,
+    reset: true,
+  },
+  inventory: {
+    contents: [
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+      [],[],[],[],[],[],[],[],
+    ],
+    open: false,
+    reset: true,
+  }
 };
 
 let clock = new THREE.Clock();
@@ -33,9 +54,6 @@ let delta = 0;
 let interval = 1 / 60;
 
 let composer;
-
-let worldObjects = [];
-let worldObjectCounter = 0;
 
 let models = {
   baseTile: { url: "/assets/models/baseTile.glb" },
@@ -85,11 +103,15 @@ document.getElementById("cylinder-button").addEventListener("click", () => {
   scene.add(playerAttributes.heldTile.mesh);
 });
 
-// playerAttributes.heldTile = new tile(playerCube.position.x,playerCube.position.y,playerCube.position.z, 0x550555)
 
 window.addEventListener("mousedown", mouseClick);
 
-function mouseClick() {
+function mouseClick() { // written up
+
+
+  
+
+
   if (playerAttributes.ammo != 0 && playerAttributes.canShoot) {
     createProjectile(playerCube);
     playerAttributes.ammo -= 1;
@@ -99,6 +121,7 @@ function mouseClick() {
     playerAttributes.heldTile.mesh.material.opacity = 1;
     playerAttributes.heldTile.mesh.material.castShadow = true;
     collidableMeshList.push(playerAttributes.heldTile.mesh);
+    worldObjects.push(playerAttributes.heldTile.mesh)
 
     playerAttributes.canShoot = true;
     playerAttributes.heldTile = false;
@@ -121,7 +144,7 @@ window.addEventListener("mousemove", (event) => {
   mousePos = { x: event.clientX, y: event.clientY };
 });
 
-class tile {
+class tile { // written up
   constructor(x, y, z) {
     this.mesh = new THREE.Mesh(
       new THREE.BoxGeometry(0.25, 0.25, 0.25),
@@ -136,7 +159,7 @@ class tile {
   }
 }
 
-class slope {
+class slope { // written up
   constructor(x, y, z) {
     let shape = new THREE.Shape();
     shape.moveTo(0, 0);
@@ -162,7 +185,7 @@ class slope {
   }
 }
 
-class cylinder {
+class cylinder { // written up
   constructor(x, y, z) {
     this.mesh = new THREE.Mesh(
       new THREE.CylinderGeometry(
@@ -182,7 +205,7 @@ class cylinder {
   }
 }
 
-class entity {
+class entity { // written up
   constructor(x, y, z, texture) {
     let entity = new THREE.Mesh(
       new THREE.BoxGeometry(0.125, 0.125, 0.125),
@@ -199,9 +222,9 @@ class entity {
   }
 }
 
-class gltfObject {
+class gltfObject { // written up
   constructor(tile, x, y, z) {
-    /**@type {THREE.Mesh} */
+    /*@type {THREE.Mesh} */
     this.mesh = models[tile].gltf.scene.clone();
 
     if (tile == "rocks") {
@@ -220,15 +243,13 @@ class gltfObject {
       y -= 0.0001;
     }
 
-    console.log(this.mesh.material);
-
     this.mesh.rotation.y += Math.PI / 4;
     this.mesh.position.set(x, y - 0.1, z);
     this.mesh.scale.set(0.25, 0.5, 0.25);
   }
 }
 
-function createProjectile(parentObj) {
+function createProjectile(parentObj) { // written up
   let proj = new THREE.Mesh(
     new THREE.BoxGeometry(0.1, 0.05, 0.05),
     new THREE.MeshPhongMaterial({ color: 0x0000ff })
@@ -257,7 +278,7 @@ function createProjectile(parentObj) {
 }
 
 // initialise function
-function init() {
+function init() { // written up
   // creating the camera
   const aspectRatio = window.innerWidth / window.innerHeight;
   camera = new THREE.OrthographicCamera(
@@ -306,7 +327,6 @@ function init() {
   playerCube.position.y += 0.125;
 
   let playerModel = models.playerModel.gltf.scene;
-  console.log(playerModel);
 
   playerCube.add(playerModel);
   playerModel.scale.set(0.0365, 0.0365, 0.0365);
@@ -314,16 +334,18 @@ function init() {
   playerModel.position.y = -0.125;
 
   threeDCursor = new THREE.Mesh(
-    new THREE.BoxGeometry(0.01, 0.15, 0.1),
+    new THREE.BoxGeometry(0.01, 0.12, 0.25),
     new THREE.MeshPhongMaterial({
       color: 0xffffff,
       transparent: true,
       opacity: 0.2,
     })
   );
-  threeDCursor.position.y = 0.125;
+  threeDCursor.position.y = 0.11;
 
   scene.add(threeDCursor);
+
+  threeDCursor.scale.set(0, 0, 0)
 
   // spotlight
   let spotLight = new THREE.SpotLight(0xffc100, 10, 10, Math.PI / 2, 0.02, 2);
@@ -361,6 +383,7 @@ function init() {
         0.35 * zPos + 0.175
       ).mesh;
       scene.add(worldObjects[worldObjectCounter]);
+
       worldObjectCounter++;
     }
   }
@@ -372,25 +395,11 @@ function init() {
   toaster.position.x += 0.15;
   playerCube.add(toaster);
 
-  //
-  let tempRock;
-  tempRock = models["rocks"].gltf.scene.clone();
-
-  tempRock.rotation.y += Math.PI / 4;
-  tempRock.position.set(0, 0.5, 0);
-  tempRock.scale.set(0.25, 0.5, 0.25);
-
-  scene.add(tempRock);
-
-  //
-
   animate();
 }
-2;
 // animation
 
-// this all needs documenting
-function mouseStuff() {
+function mouseStuff() { // written up
   let betterMouseY = (mousePos.y + 30 - window.innerHeight / 2) * -1;
   let betterMouseX = mousePos.x - window.innerWidth / 2;
 
@@ -414,21 +423,23 @@ function mouseStuff() {
     playerCube.rotation.y =
       -Math.atan(betterMouseX / betterMouseY) + 2 * Math.PI;
   }
-  threeDCursorStuff();
+  if (playerAttributes.buildMenu.open) {
+    threeDCursorStuff();
+  }
+
 
   if (playerAttributes.heldTile != false) {
     playerAttributes.heldTile.mesh.position.x =
       (Math.round((threeDCursor.position.x / 17.5) * 100) / 100) * 17.5;
     playerAttributes.heldTile.mesh.position.z =
       (Math.round((threeDCursor.position.z / 17.5) * 100) / 100) * 17.5;
-    console.log(playerAttributes.heldTile.mesh.position);
   }
 
   //
 }
 
 // movement
-function movement(currentKeysPressed) {
+function movement(currentKeysPressed) { // written up
   if (currentKeysPressed["w"]) {
     if (!justCheckCollisions()) {
       previousPlayer = playerCube.clone();
@@ -438,7 +449,7 @@ function movement(currentKeysPressed) {
       Math.round((playerCube.position.z + 0.005) * 1000) / 1000;
     camera.position.z = Math.round((camera.position.z + 0.005) * 1000) / 1000;
   }
-  if (currentKeysPressed["s"]) {
+  if (currentKeysPressed["s"]) { // written up
     if (!justCheckCollisions()) {
       previousPlayer = playerCube.clone();
       previousCamera = camera.clone();
@@ -447,7 +458,7 @@ function movement(currentKeysPressed) {
       Math.round((playerCube.position.z - 0.005) * 1000) / 1000;
     camera.position.z = Math.round((camera.position.z - 0.005) * 1000) / 1000;
   }
-  if (currentKeysPressed["a"]) {
+  if (currentKeysPressed["a"]) { // written up
     if (!justCheckCollisions()) {
       previousPlayer = playerCube.clone();
       previousCamera = camera.clone();
@@ -456,7 +467,7 @@ function movement(currentKeysPressed) {
       Math.round((playerCube.position.x + 0.005) * 1000) / 1000;
     camera.position.x = Math.round((camera.position.x + 0.005) * 1000) / 1000;
   }
-  if (currentKeysPressed["d"]) {
+  if (currentKeysPressed["d"]) { // written up
     if (!justCheckCollisions()) {
       previousPlayer = playerCube.clone();
       previousCamera = camera.clone();
@@ -469,7 +480,8 @@ function movement(currentKeysPressed) {
   if (currentKeysPressed["q"]) {
     new entity(0, 0.0625, 0, 0xff0000);
   }
-  if (currentKeysPressed["r"]) {
+
+  if (currentKeysPressed["r"]) { // written up
     playerAttributes.canShoot = false;
     setTimeout(function () {
       playerAttributes.ammo = 10;
@@ -479,14 +491,63 @@ function movement(currentKeysPressed) {
     }, 1500);
   }
 
-  if (currentKeysPressed["t"]) {
-    let tempObject = new tile(0, 0.125, 0, 0x00ff00);
-    collidableMeshList.push(tempObject.mesh);
-    scene.add(tempObject.mesh);
+  if(currentKeysPressed["e"]){ // written up
+    inventoryManagement()
+  } else if (!currentKeysPressed["e"]){
+    playerAttributes.inventory.reset = true;
   }
+
+  if (currentKeysPressed["t"]) {
+  }
+
+  if (currentKeysPressed["x"]) { // written up
+    if (playerAttributes.selectedTile != null && !playerAttributes.heldTile && playerAttributes.buildMenu.open) {
+      harvest();
+      playerAttributes.selectedTile.scale.set(0, 0, 0)
+      playerAttributes.selectedTile = null;
+    }
+  }
+
+  if (currentKeysPressed["b"]) { // written up
+    if (playerAttributes.buildMenu.reset == true && playerAttributes.buildMenu.open == true){
+      playerAttributes.buildMenu.open = false;
+      playerAttributes.buildMenu.reset = false;
+
+      let bMenu = document.getElementById("build-menu");
+      playerAttributes.canShoot = true;
+      tileColourReset()
+      playerAttributes.selectedTile = null;
+      bMenu.style.visibility = "hidden";
+      threeDCursor.scale.set(0, 0, 0)
+
+    } else if (playerAttributes.buildMenu.reset == true && playerAttributes.buildMenu.open == false){
+      playerAttributes.buildMenu.open = true;
+      playerAttributes.buildMenu.reset = false
+
+      let bMenu = document.getElementById("build-menu");
+      playerAttributes.canShoot = false;
+      bMenu.style.visibility = "visible";
+      threeDCursor.scale.set(1, 1, 1)
+
+    }
+
+  } else if (!currentKeysPressed["b"]){
+    playerAttributes.buildMenu.reset = true;
+  }
+
 }
 
-function threeDCursorStuff() {
+/*
+    if (playerAttributes.buildMenu) {
+      playerAttributes.buildMenu = false;
+    }
+    let bMenu = document.getElementById("build-menu");
+    playerAttributes.buildMenu = true;
+*/
+
+
+
+function threeDCursorStuff() { // written up
   let vector = new THREE.Vector3();
   vector.set(
     (mousePos.x / window.innerWidth) * 2 - 1,
@@ -528,18 +589,26 @@ function threeDCursorStuff() {
     ) {
       let intersectedObject = collisionResults[0].object;
       if (!intersectedObject.hasMaterialBeenCloned) {
+
         intersectedObject.material = intersectedObject.material.clone();
         intersectedObject.hasMaterialBeenCloned = true;
       }
-      intersectedObject.material.color.set(0xff0000);
-      //collisionResults[0].object.material.color.set(0xff0000); // issue related to creating as gltfObject
-      // console.log(collisionResults)
-      // console.log(worldObjects.length)
+
+      if (playerAttributes.selectedTile != null) {
+        // console.log(" CRAWLLLLLINNGGG INNNNNN MY SKINNNNNN",playerAttributes.selectedTile.material.color)
+        // playerAttributes.selectedTile.material.color.set(0xffffff);
+
+        tileColourReset();
+      }
+
+      //   intersectedObject.material.color.set(0xff0000);
+      playerAttributes.selectedTile = intersectedObject;
+      intersectedObject.material.color.set(0xff0000)
     }
   }
 }
 
-function resetCollisionCheck() {
+function resetCollisionCheck() { // written up
   let shitCube = playerCube.clone();
   for (
     let vertexIndex = 0;
@@ -574,7 +643,7 @@ function resetCollisionCheck() {
   }
 }
 
-function justCheckCollisions() {
+function justCheckCollisions() { // written up
   let shitCube = playerCube.clone();
   for (
     let vertexIndex = 0;
@@ -601,7 +670,7 @@ function justCheckCollisions() {
   }
 }
 
-function enemyManagement() {
+function enemyManagement() { // written up
   for (let i = 0; i < enemyList.length; i++) {
     let attack1 = false;
     let attack2 = false;
@@ -610,26 +679,26 @@ function enemyManagement() {
 
     if (playerCube.position.x > enemyList[i].position.x) {
       if (playerCube.position.x - (enemyList[i].position.x + 0.1) > 0) {
-        enemyList[i].position.x += 0.003;
+        enemyList[i].position.x += 0.0015 + Math.floor((Math.random()-0.5)*180)/10000;
       } else {
         attack1 = true;
       }
     } else {
       if (enemyList[i].position.x - (playerCube.position.x + 0.1) > 0) {
-        enemyList[i].position.x -= 0.003;
+        enemyList[i].position.x -= 0.0015 + Math.floor((Math.random()-0.5)*180)/10000;
       } else {
         attack1 = true;
       }
     }
     if (playerCube.position.z > enemyList[i].position.z) {
       if (playerCube.position.z - (enemyList[i].position.z + 0.1) > 0) {
-        enemyList[i].position.z += 0.003;
+        enemyList[i].position.z += 0.0015 + Math.floor((Math.random()-0.5)*180)/10000;
       } else {
         attack2 = true;
       }
     } else {
       if (enemyList[i].position.z - (playerCube.position.z + 0.1) > 0) {
-        enemyList[i].position.z -= 0.003;
+        enemyList[i].position.z -= 0.0015 + Math.floor((Math.random()-0.5)*60)/10000;
       } else {
         attack2 = true;
       }
@@ -646,7 +715,7 @@ function enemyManagement() {
   checkEnemyHit();
 }
 
-function checkEnemyHit() {
+function checkEnemyHit() { // written up
   for (let i = 0; i < enemyList.length; i++) {
     for (
       let j = 0;
@@ -675,7 +744,7 @@ function checkEnemyHit() {
   }
 }
 
-function animate() {
+function animate() { // written up
   delta += clock.getDelta();
   if (delta > interval) {
     resetCollisionCheck();
@@ -691,7 +760,7 @@ function animate() {
   }
 }
 
-function randomObject() {
+function randomObject() { // written up
   let randNum = Math.floor(Math.random() * 15);
   let tile;
 
@@ -707,8 +776,124 @@ function randomObject() {
   return tile;
 }
 
-/* trash heap VVVVVVVV
+function tileColourReset() { // written up
+  if (playerAttributes.selectedTile != null) {
+    if (playerAttributes.selectedTile.name == "Mesh_tree") {
+      playerAttributes.selectedTile.material.color.set(0x8ddbc4)
 
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_1") {
+      playerAttributes.selectedTile.material.color.set(0xf1c1a2)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_2") {
+      playerAttributes.selectedTile.material.color.set(0x8ddbc4)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_3") {
+      playerAttributes.selectedTile.material.color.set(0xf1c1a2)
+
+    } else if (playerAttributes.selectedTile.name == "detail_rocks") {
+      playerAttributes.selectedTile.material.color.set(0xd4edf2)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree") {
+      playerAttributes.selectedTile.material.color.set(0x8ddbc4)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree_1") {
+      playerAttributes.selectedTile.material.color.set(0xf1c1a2)
+
+    } else {
+      playerAttributes.selectedTile.material.color.set(0xffffff)
+    }
+
+  }
+
+}
+
+
+
+// harvesting
+function harvest() { // written up
+  if (playerAttributes.selectedTile != null) {
+    if (playerAttributes.selectedTile.name == "Mesh_tree") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_1") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_2") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_tree_3") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "detail_rocks") {
+      inventoryAdd(["rock",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree") {
+      inventoryAdd(["wood",1])
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree_1") {
+      inventoryAdd(["wood",1])
+
+    }
+  }
+}
+
+function inventoryManagement(){ // written up
+  let pInv = playerAttributes.inventory
+
+  if(pInv.reset == true && pInv.open == true){
+    pInv.open = false;
+    pInv.reset = false;
+    document.getElementById("inventory-container").style.visibility = "hidden";
+
+  } else if(pInv.reset == true && pInv.open == false){
+    pInv.open = true;
+    pInv.reset = false;
+
+    for(let i = 0; i < pInv.contents.length; i++){
+      if(i != undefined){
+        document.getElementById("slot-"+i).innerHTML = pInv.contents[i];
+      } else {
+        document.getElementById("slot-"+i).innerHTML = "_";
+      }
+    }
+
+    document.getElementById("inventory-container").style.visibility = "visible"
+  }
+
+
+}
+
+
+function inventoryAdd(input){ // written up
+  let pInv = playerAttributes.inventory.contents;
+  let noSlotFound = true;
+  let i = 0;
+
+  while(noSlotFound){
+    if(pInv[i][0] != undefined){
+      if(pInv[i][0] == input[0]){
+        pInv[i][1] += input[1];
+        noSlotFound = false;
+      }
+    }
+    i++
+    if (i == pInv.length){
+      
+      for(let i = 0; i < pInv.length; i++){
+        
+        if(pInv[i][0] == undefined){
+          pInv[i] = input;
+          noSlotFound = false;
+          i = pInv.length
+        }
+      }
+      noSlotFound = false;
+    }
+  }
+}
+
+
+/* trash heap VVVVVVVV
 
 
 
