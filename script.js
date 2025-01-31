@@ -109,7 +109,7 @@ window.addEventListener("mousedown", mouseClick);
 function mouseClick() { // written up
 
 
-  
+
 
 
   if (playerAttributes.ammo != 0 && playerAttributes.canShoot) {
@@ -743,6 +743,7 @@ function checkEnemyHit() { // written up
     }
   }
 }
+//
 
 function animate() { // written up
   delta += clock.getDelta();
