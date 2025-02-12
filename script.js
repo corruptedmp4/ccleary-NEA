@@ -21,10 +21,6 @@ let worldObjects = [];
 
 let worldObjectCounter = 0;
 
-let worldObjects = [];
-
-let worldObjectCounter = 0;
-
 let mousePos = { x: undefined, y: undefined };
 
 
@@ -36,22 +32,6 @@ let playerAttributes = {
   attackDamage: 1,
   canShoot: true,
   heldTile: false,
-  selectedTile: null,
-  buildMenu: {
-    open: false,
-    reset: true,
-  },
-  inventory: {
-    contents: [
-      [],[],[],[],[],[],[],[],
-      [],[],[],[],[],[],[],[],
-      [],[],[],[],[],[],[],[],
-      [],[],[],[],[],[],[],[],
-      [],[],[],[],[],[],[],[],
-    ],
-    open: false,
-    reset: true,
-  }
   selectedTile: null,
   buildMenu: {
     open: false,
