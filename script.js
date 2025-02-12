@@ -1,6 +1,7 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
+
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPixelatedPass } from "three/addons/postprocessing/RenderPixelatedPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
@@ -22,6 +23,8 @@ let worldObjects = [];
 let worldObjectCounter = 0;
 
 let mousePos = { x: undefined, y: undefined };
+
+
 
 
 let playerAttributes = {
@@ -53,8 +56,9 @@ let playerAttributes = {
 let clock = new THREE.Clock();
 let delta = 0;
 let interval = 1 / 60;
-
 let composer;
+
+let loadingComplete = false;
 
 let models = {
   baseTile: { url: "/assets/models/baseTile.glb" },
@@ -67,7 +71,10 @@ let models = {
 };
 
 let manager = new THREE.LoadingManager();
-manager.onLoad = init;
+manager.onLoad = function(){
+  loadingComplete = true;
+
+}
 
 let gltfLoader = new GLTFLoader(manager);
 
@@ -103,6 +110,29 @@ document.getElementById("cylinder-button").addEventListener("click", () => {
   playerAttributes.heldTile = new cylinder(0, 0.125, 0);
   scene.add(playerAttributes.heldTile.mesh);
 });
+
+document.getElementById("start-button").addEventListener("click", () => {
+  if(loadingComplete){
+    document.getElementById("main-menu").style.visibility = "hidden";
+    init()
+    let slider = document.getElementById("audio-slider");
+    let mainMusic = new Howl({
+      src:"/assets/sounds/ccleary-music.wav",
+      loop: true,
+      volume: slider.value/100
+    })
+    mainMusic.play()
+    //this is where audio should start playing
+  }
+})
+
+document.getElementById("settings-exit-button").addEventListener("click", () => {
+  document.getElementById("settings-menu").style.visibility = "hidden";
+})
+
+document.getElementById("settings-button").addEventListener("click", () => {
+  document.getElementById("settings-menu").style.visibility = "visible";
+})
 
 
 window.addEventListener("mousedown", mouseClick);
