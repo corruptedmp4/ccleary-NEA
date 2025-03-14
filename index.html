@@ -20,143 +20,125 @@
   </script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/howler/2.2.4/howler.min.js" integrity="sha512-xi/RZRIF/S0hJ+yJJYuZ5yk6/8pCiRlEXZzoguSMl+vk2i3m6UjUO/WcZ11blRL/O+rnj94JRGwt/CHbc9+6EA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 
+  <div id="everything" class="everything-grid">
 
-
-
-  
-
-  <div id="hotbar" class="hotbar"; style="width:400px;height:50px;position:absolute;bottom:0; background-color:rgb(36, 35, 35);justify-content:center;align-content:center;">
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-    <div class="inventory-slot"></div>
-  </div>
-
-    <div style="position:absolute; bottom:50px; left:0; width:400px; height:30px">
-      <div style="width:200px;height:20px;position:absolute;bottom:10;left:0;background-color:red"></div>
-      <div id="health" style="width:200px;height:20px;position:absolute;bottom:10;left:0;background-color:green"></div>
-
-      <div style="width:100px;height:10px;position:absolute;bottom:0;left:0;background-color:rgb(8, 74, 94);"></div>
-      <div id="stamina" style="width:100px;height:10px;position:absolute;bottom:0;left:0;background-color:rgb(18, 158, 201);"></div>
-      
-      <div style ="width:100px;height:10px;position:absolute;bottom:0;left:100px;background-color:rgb(58, 48, 4);"></div>
-      <div id="ammo" style ="width:100px;height:10px;position:absolute;bottom:0;left:100px;background-color:rgb(231, 193, 25);"></div>
-
-  </div>
-
-  <div class="inventory-grid" style="position:absolute;width:100%;height:100%">
-      <div id="inventory-container" style= "width:100%;height:60%;background-color:rgba(81, 72, 92, 0.454);grid-column:2/3;grid-row:2/3;visibility:hidden">
-        <div class="inventory-grid" style="position:relative;width:100%;height:100%;justify-content:center;align-content:center;">
-          <div class="inventory-slot" id="slot-0"></div>
-          <div class="inventory-slot" id="slot-1"></div>
-          <div class="inventory-slot" id="slot-2"></div>
-          <div class="inventory-slot" id="slot-3"></div>
-          <div class="inventory-slot" id="slot-4"></div>
-          <div class="inventory-slot" id="slot-5"></div>
-          <div class="inventory-slot" id="slot-6"></div>
-          <div class="inventory-slot" id="slot-7"></div>
-          <div class="inventory-slot" id="slot-8"></div>
-          <div class="inventory-slot" id="slot-9"></div>
-          <div class="inventory-slot" id="slot-10"></div>
-          <div class="inventory-slot" id="slot-11"></div>
-          <div class="inventory-slot" id="slot-12"></div>
-          <div class="inventory-slot" id="slot-13"></div>
-          <div class="inventory-slot" id="slot-14"></div>
-          <div class="inventory-slot" id="slot-15"></div>
-          <div class="inventory-slot" id="slot-16"></div>
-          <div class="inventory-slot" id="slot-17"></div>
-          <div class="inventory-slot" id="slot-18"></div>
-          <div class="inventory-slot" id="slot-19"></div>
-          <div class="inventory-slot" id="slot-20"></div>
-          <div class="inventory-slot" id="slot-21"></div>
-          <div class="inventory-slot" id="slot-22"></div>
-          <div class="inventory-slot" id="slot-23"></div>
-          <div class="inventory-slot" id="slot-24"></div>
-          <div class="inventory-slot" id="slot-25"></div>
-          <div class="inventory-slot" id="slot-26"></div>
-          <div class="inventory-slot" id="slot-27"></div>
-          <div class="inventory-slot" id="slot-28"></div>
-          <div class="inventory-slot" id="slot-29"></div>
-          <div class="inventory-slot" id="slot-30"></div>
-          <div class="inventory-slot" id="slot-31"></div>
-          <div class="inventory-slot" id="slot-32"></div>
-          <div class="inventory-slot" id="slot-33"></div>
-          <div class="inventory-slot" id="slot-34"></div>
-          <div class="inventory-slot" id="slot-35"></div>
-          <div class="inventory-slot" id="slot-36"></div>
-          <div class="inventory-slot" id="slot-37"></div>
-          <div class="inventory-slot" id="slot-38"></div>
-          <div class="inventory-slot" id="slot-39"></div>
+    <div id="build-menu-container" style="grid-row:2/3;grid-column:1/2;visibility:hidden">
+        <div id="build-menu-grid" class="build-grid">
+            <div id="cube-button" class="build-slot">
+                <img src=/assets/textures/cube-button.png style="width:100%;height:100%">
+            </div>
+            <div id="stair-button" class="build-slot">
+                <img src=/assets/textures/stair-button.png style="width:100%;height:100%">
+            </div>
+            <div id="cylinder-button" class="build-slot">
+                <img src=/assets/textures/cylinder-button.png style="width:100%;height:100%">
+            </div>
+            <div id="turret-button" class="build-slot">
+                <img src=/assets/textures/sentry-button.png style="width:100%;height:100%">
+            </div>
         </div>
+    </div>
+
+    <div id="hotbar-container" style="grid-row:4/5;grid-column:1/3;position:relative">
+      <div class="bar" style="background-color:red;"></div>
+      <div id="health" class="bar" style="background-color:green;"></div>
+      <div class="bar" style="background-color:rgb(148, 107, 5);top:20%"></div>
+      <div id="ammo" class="bar" style="background-color:yellow;top:20%"></div>
+      <div id="hotbar-grid" class="hotbar-grid" style="top:40%;position:relative">
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
+        <div class="inventory-slot"></div>
       </div>
 
+    </div>
 
-    <div id="build-menu" style="width:100%;height:100%;background-color:rgba(81, 72, 92, 0.454);grid-row:2/3;grid-column:1/2;visibility:hidden">
-      <div id="build-grid" class="build-grid" style="position:relative;width:100%;height:100%;justify-content:center;align-content:center;">
-        <div id="cube-button" class="build-slot">cube</div>
-        <div id="stair-button" class="build-slot">stair</div>
-        <div id="cylinder-button" class="build-slot">cylinder</div>
-        <div class="build-slot"></div>
-        <div class="build-slot"></div>
+    <div id="crafting-container" style="grid-row:1/2;grid-column:4/5;visibility:hidden;">
+        <div id="crafting-grid" class="crafting-grid">
+            <div id="craft-1" class="crafting-slot"><img src=/assets/textures/sentry-button.png style="width:100%;height:100%"></div>
+            <div id="craft-2" class="crafting-slot"><img src=/assets/textures/cube-button.png style="width:100%;height:100%"></div>
+            <div id="craft-3" class="crafting-slot"><img src=/assets/textures/stair-button.png style="width:100%;height:100%"></div>
+            <div id="craft-4" class="crafting-slot"><img src=/assets/textures/cylinder-button.png style="width:100%;height:100%"></div>
+            <div id="craft-5" class="crafting-slot"><img src=/assets/textures/ammo-button.png style="width:100%;height:100%"></div>
+            <div id="craft-6" class="crafting-slot"><img src=/assets/textures/health-button.png style="width:100%;height:100%"></div>
+            <div id="craft-7" class="crafting-slot"></div>
+            <div id="craft-8" class="crafting-slot"></div>
+            <div id="craft-9" class="crafting-slot"></div>
+        </div>
+
+    </div>
+
+    <div id="inventory-container" style="grid-row:2/3;grid-column:4/6;visibility:hidden">
+      <div id="inventory-grid" class="inventory-grid">
+        <div class="inventory-slot" id="slot-0"></div>
+        <div class="inventory-slot" id="slot-1"></div>
+        <div class="inventory-slot" id="slot-2"></div>
+        <div class="inventory-slot" id="slot-3"></div>
+        <div class="inventory-slot" id="slot-4"></div>
+        <div class="inventory-slot" id="slot-5"></div>
+        <div class="inventory-slot" id="slot-6"></div>
+        <div class="inventory-slot" id="slot-7"></div>
+        <div class="inventory-slot" id="slot-8"></div>
+        <div class="inventory-slot" id="slot-9"></div>
+        <div class="inventory-slot" id="slot-10"></div>
+        <div class="inventory-slot" id="slot-11"></div>
+        <div class="inventory-slot" id="slot-12"></div>
+        <div class="inventory-slot" id="slot-13"></div>
+        <div class="inventory-slot" id="slot-14"></div>
+        <div class="inventory-slot" id="slot-15"></div>
+        <div class="inventory-slot" id="slot-16"></div>
+        <div class="inventory-slot" id="slot-17"></div>
+        <div class="inventory-slot" id="slot-18"></div>
+        <div class="inventory-slot" id="slot-19"></div>
       </div>
     </div>
+  </div>
   </div>
 
   <div id="threejs">
     <script  type="module" , src="/script.js" style="position:absolute; top:0; left:0"> </script>
   </div>
   
-  <div id="main-menu" style="width:100%;height:100%;position:absolute">
+  <div id="main-menu" style="width:100%;height:100%;position:absolute;visibility:visible">
     <div id="main-menu-grid" class="main-menu-grid" style="position:relative;width:100%;height:100%; ">
       <img src="/assets/textures/background.gif" style="width:100%;height:100%;grid-row:1/9;grid-column:1/5">
-      <div id="title-box" style="width:100%;height:40%;grid-column:1/3;grid-row:2/4;">
+      <img src="/assets/textures/background-overlay.png" style="width:100%;height:100%;grid-row:1/9;grid-column:1/5">
+      
+      <div id="title-box" style="width:100%;height:100%;grid-column:1/3;grid-row:2/4;">
         <img src="/assets/textures/title-button.png" style="width:100%;height:100%;">
       </div>
-      <div id="start-button" style="height:80%;grid-column:4/5;grid-row:6/7;">
+      <div id="start-button" style="height:100%;grid-column:4/5;grid-row:6/7;">
         <img src="/assets/textures/start-button.png" style="width:100%;height:100%;">
       </div>
-      <div id="settings-button" style="height:80%;grid-column:4/5;grid-row:7/8;">
+      <div id="settings-button" style="height:100%;grid-column:4/5;grid-row:7/8;">
         <img src="/assets/textures/settings-button.png" style="width:100%;height:100%;">
       </div>
     </div>
   </div>
 
   <div id="settings-menu" style="width:100%;height:100%;background-color:rgb(0, 100 ,100);position:absolute;visibility:hidden">
+    
     <div id="settings-grid" class="main-menu-grid" style="position:relative;width:100%;height:100%;">
+      <img src="/assets/textures/background.gif" style="width:100%;height:100%;grid-row:1/9;grid-column:1/5">
+      <img src="/assets/textures/background-overlay.png" style="width:100%;height:100%;grid-row:1/9;grid-column:1/5">
       <div id="audio-slider-container" style="width:100%;height:100%;position:relative;grid-row:2/3;grid-column:1/2;background-color:aqua">
         <input id="audio-slider" type="range" min="0" max="100" value="100">AUDIO SLIDER
-        
       </div>
-      <div id="settings-exit-button" style="height:80%;grid-column:4/5;grid-row:7/8;" >
+      <div id="settings-exit-button" style="height:100%;grid-column:4/5;grid-row:7/8;" >
         <img src="/assets/textures/exit-settings.png" style="width:100%;height:100%;">
       </div>
     </div>
   </div>
 
-  <div id="crafting-container" class="three-by-three-grid" style="visibility:hidden">
-    <div id="crafting-menu" style="width:300px;height:300px;background-color:rgba(72,256,256,0.2);position:absolute;place-items:center;align-content:center;grid-row:1;grid-column:3">
-      <div id="crafting-grid" class="three-by-three-grid" style="position:relative;height:95%;width:95%;background-color:rgba(0,256,0,0.1);gap:10px">
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-        <div style="background-color:blue"></div>
-      </div>
-    </div>
-  </div>
-
-  
-
-  
+  <img id="game-over" src="/assets/textures/game-over.png" style="visibility:hidden;position:absolute;height:100%;width:100%">
   
 </body>
 

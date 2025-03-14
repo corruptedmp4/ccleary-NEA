@@ -1,7 +1,6 @@
 import * as THREE from "three";
 import { GLTFLoader } from "three/addons/loaders/GLTFLoader.js";
 
-
 import { EffectComposer } from "three/addons/postprocessing/EffectComposer.js";
 import { RenderPixelatedPass } from "three/addons/postprocessing/RenderPixelatedPass.js";
 import { OutputPass } from "three/addons/postprocessing/OutputPass.js";
@@ -19,24 +18,25 @@ let enemyList = [];
 let entityList = [];
 let projectileList = [];
 let worldObjects = [];
+let turretList = [];
 
 let worldObjectCounter = 0;
 
 let mousePos = { x: undefined, y: undefined };
 
 
-
-
-let playerAttributes = {
-  health: 100,
-  stamina: 100,
-  ammo: 10,
-  speed: 1,
-  attackDamage: 1,
-  canShoot: true,
-  heldTile: false,
-  selectedTile: null,
-  buildMenu: {
+ 
+ 
+let playerAttributes = { 
+  health: 100, 
+  stamina: 100, 
+  ammo: 10, 
+  speed: 1, 
+  attackDamage: 1, 
+  canShoot: true, 
+  heldTile: false, 
+  selectedTile: null, 
+  buildMenu: { 
     open: false,
     reset: true,
   },
@@ -44,10 +44,12 @@ let playerAttributes = {
     contents: [
       [],[],[],[],[],[],[],[],
       [],[],[],[],[],[],[],[],
-      [],[],[],[],[],[],[],[],
-      [],[],[],[],[],[],[],[],
-      [],[],[],[],[],[],[],[],
+      [],[],[],[]
     ],
+    open: false,
+    reset: true,
+  },
+  craftingMenu: {
     open: false,
     reset: true,
   }
@@ -55,7 +57,7 @@ let playerAttributes = {
 
 let clock = new THREE.Clock();
 let delta = 0;
-let interval = 1 / 60;
+let interval = 1 / 60
 let composer;
 
 let loadingComplete = false;
@@ -81,6 +83,7 @@ let gltfLoader = new GLTFLoader(manager);
 for (let model of Object.values(models)) {
   gltfLoader.load(model.url, (gltf) => {
     model.gltf = gltf;
+    console.log(model.gltf)
     // console.log(model.gltf)
   });
 }
@@ -90,25 +93,54 @@ const currentKeysPressed = {};
 
 // continuous
 
+document.getElementById("settings-menu").addEventListener("click", () => {
+  console.log("FUCKKKK PANIC")
+})
+
+
 document.getElementById("cube-button").addEventListener("click", () => {
-  console.log("cube");
-  playerAttributes.canShoot = false;
-  playerAttributes.heldTile = new tile(0, 0.125, 0);
-  scene.add(playerAttributes.heldTile.mesh);
+  console.log("cube-button")
+  if(inventoryRemove(["cube",1])){
+    console.log("cube");
+    playerAttributes.canShoot = false;
+    playerAttributes.heldTile = new tile(0, 0.125, 0);
+    scene.add(playerAttributes.heldTile.mesh);
+  }
 });
 
 document.getElementById("stair-button").addEventListener("click", () => {
-  console.log("stair");
-  playerAttributes.canShoot = false;
-  playerAttributes.heldTile = new slope(-0.0625, 0, -0.0625);
-  scene.add(playerAttributes.heldTile.mesh);
+  if(inventoryRemove(["stair",1])){
+    console.log("stair");
+    playerAttributes.canShoot = false;
+    playerAttributes.heldTile = new slope(-0.0625, 0, -0.0625);
+    scene.add(playerAttributes.heldTile.mesh);
+  }
 });
 
 document.getElementById("cylinder-button").addEventListener("click", () => {
-  console.log("cylinder");
-  playerAttributes.canShoot = false;
-  playerAttributes.heldTile = new cylinder(0, 0.125, 0);
-  scene.add(playerAttributes.heldTile.mesh);
+  if(inventoryRemove(["cylinder",1])){
+    console.log("cylinder");
+    playerAttributes.canShoot = false;
+    playerAttributes.heldTile = new cylinder(0, 0.125, 0);
+    scene.add(playerAttributes.heldTile.mesh);
+  }
+});
+
+document.getElementById("turret-button").addEventListener("click", () => {
+  console.log("turret-button")
+  if(inventoryRemove(["turret",1])){
+    console.log("turret");
+    playerAttributes.canShoot = false;
+    playerAttributes.heldTile = models.turret.gltf.scene.clone()
+    playerAttributes.heldTile.mesh = models.turret.gltf.scene.clone()
+    playerAttributes.heldTile.name = "turret"
+    playerAttributes.heldTile.mesh.scale.set(0.25,0.25,0.25)
+    playerAttributes.heldTile.mesh.position.set(0, 0, 0);
+    playerAttributes.heldTile.mesh.rotation.y = Math.PI / 4;
+    scene.add(playerAttributes.heldTile.mesh)
+  }
+
+  
 });
 
 document.getElementById("start-button").addEventListener("click", () => {
@@ -138,21 +170,31 @@ document.getElementById("settings-button").addEventListener("click", () => {
 window.addEventListener("mousedown", mouseClick);
 
 function mouseClick() { // written up
-
+  console.log("mouse clicked")
 
   if (playerAttributes.ammo != 0 && playerAttributes.canShoot) {
     createProjectile(playerCube);
     playerAttributes.ammo -= 1;
-    document.getElementById("ammo").style.width =
-      playerAttributes.ammo * 10 + "px";
-  } else if (playerAttributes.heldTile != false) {
-    playerAttributes.heldTile.mesh.material.opacity = 1;
-    playerAttributes.heldTile.mesh.material.castShadow = true;
-    collidableMeshList.push(playerAttributes.heldTile.mesh);
-    worldObjects.push(playerAttributes.heldTile.mesh)
+    document.getElementById("ammo").style.width = playerAttributes.ammo * 5 + "%";
 
-    playerAttributes.canShoot = true;
-    playerAttributes.heldTile = false;
+  } else if (playerAttributes.heldTile.name != false) {
+    console.log(playerAttributes.heldTile.name)
+    if(playerAttributes.heldTile.mesh.name != "turret"){
+      try{
+        playerAttributes.heldTile.mesh.material.opacity = 1;
+        playerAttributes.heldTile.mesh.material.castShadow = true;
+      } catch {
+        playerAttributes.heldTile.mesh.ready = true;
+        turretList.push(playerAttributes.heldTile.mesh)
+        console.log(turretList)
+      }
+      collidableMeshList.push(playerAttributes.heldTile.mesh);
+      worldObjects.push(playerAttributes.heldTile.mesh)
+  
+      playerAttributes.canShoot = true;
+      playerAttributes.heldTile = false;
+      console.log(playerAttributes.canShoot,playerAttributes.heldTile)
+    }
   }
 }
 
@@ -233,21 +275,16 @@ class cylinder { // written up
   }
 }
 
-class entity { // written up
-  constructor(x, y, z, texture) {
-    let entity = new THREE.Mesh(
-      new THREE.BoxGeometry(0.125, 0.125, 0.125),
-      new THREE.MeshPhongMaterial({
-        color: texture,
-      })
-    );
-    entity.position.set(x, y, z);
-    enemyList.push(entity);
-    scene.add(entity);
-  }
-  updatePosition(x, y, z) {
-    entity.position.set(x, y, z);
-  }
+class enemy{
+    constructor(x,y,z){
+        this.mesh = new THREE.Mesh(
+            new THREE.BoxGeometry(0.0625,0.0625,0.0625),
+            new THREE.MeshPhongMaterial({color:770000})
+        )
+        this.mesh.position.set(x,y,z);   
+        enemyList.push(this.mesh)
+        scene.add(this.mesh)
+    }
 }
 
 class gltfObject { // written up
@@ -416,12 +453,28 @@ function init() { // written up
     }
   }
 
-  let toaster = new gltfObject("toaster", 0, 0, 0).mesh;
-  toaster.scale.set(1, 1, 1);
-  toaster.position.y += 0.15;
-  toaster.rotation.y += Math.PI / 4;
-  toaster.position.x += 0.15;
-  playerCube.add(toaster);
+
+
+  // let boundingBox = new THREE.Mesh(
+  //     new THREE.CylinderGeometry(
+  //         1,
+  //         1,
+  //         0.25,
+  //         8
+  //     ),
+  //     new THREE.MeshPhongMaterial({
+  //         color: 0xff00ff,
+  //         transparent: true,
+  //         opacity: 0.1
+  //     })
+  // )
+  // sillyTurret.add(boundingBox)
+  // boundingBox.scale.set(4,4,4)
+  // sillyTurret.ready = true;
+  // turretList.push(sillyTurret)
+
+
+
 
   animate();
 }
@@ -469,7 +522,7 @@ function mouseStuff() { // written up
 // movement
 function movement(currentKeysPressed) { // written up
   if (currentKeysPressed["w"]) {
-    if (!justCheckCollisions()) {
+    if (!justCheckCollisions(playerCube)) {
       previousPlayer = playerCube.clone();
       previousCamera = camera.clone();
     }
@@ -478,7 +531,7 @@ function movement(currentKeysPressed) { // written up
     camera.position.z = Math.round((camera.position.z + 0.005) * 1000) / 1000;
   }
   if (currentKeysPressed["s"]) { // written up
-    if (!justCheckCollisions()) {
+    if (!justCheckCollisions(playerCube)) {
       previousPlayer = playerCube.clone();
       previousCamera = camera.clone();
     }
@@ -487,7 +540,7 @@ function movement(currentKeysPressed) { // written up
     camera.position.z = Math.round((camera.position.z - 0.005) * 1000) / 1000;
   }
   if (currentKeysPressed["a"]) { // written up
-    if (!justCheckCollisions()) {
+    if (!justCheckCollisions(playerCube)) {
       previousPlayer = playerCube.clone();
       previousCamera = camera.clone();
     }
@@ -496,7 +549,7 @@ function movement(currentKeysPressed) { // written up
     camera.position.x = Math.round((camera.position.x + 0.005) * 1000) / 1000;
   }
   if (currentKeysPressed["d"]) { // written up
-    if (!justCheckCollisions()) {
+    if (!justCheckCollisions(playerCube)) {
       previousPlayer = playerCube.clone();
       previousCamera = camera.clone();
     }
@@ -506,15 +559,20 @@ function movement(currentKeysPressed) { // written up
   }
 
   if (currentKeysPressed["q"]) {
-    new entity(0, 0.0625, 0, 0xff0000);
+    let randX = 1.5-Math.random()*3;
+    let randZ = 1.5-Math.random()*3;
+
+
+    new enemy(randX, 0.0625, randZ);
   }
 
   if (currentKeysPressed["r"]) { // written up
     playerAttributes.canShoot = false;
+    
     setTimeout(function () {
       playerAttributes.ammo = 10;
       document.getElementById("ammo").style.width =
-        playerAttributes.ammo * 10 + "px";
+        playerAttributes.ammo * 5 + "%";
       playerAttributes.canShoot = true;
     }, 1500);
   }
@@ -523,6 +581,12 @@ function movement(currentKeysPressed) { // written up
     inventoryManagement()
   } else if (!currentKeysPressed["e"]){
     playerAttributes.inventory.reset = true;
+  }
+
+  if(currentKeysPressed["g"]){
+    craftingMenuManagement();
+  } else if (!currentKeysPressed["g"]){
+    playerAttributes.craftingMenu.reset = true;
   }
 
   if (currentKeysPressed["t"]) {
@@ -541,7 +605,7 @@ function movement(currentKeysPressed) { // written up
       playerAttributes.buildMenu.open = false;
       playerAttributes.buildMenu.reset = false;
 
-      let bMenu = document.getElementById("build-menu");
+      let bMenu = document.getElementById("build-menu-container");
       playerAttributes.canShoot = true;
       tileColourReset()
       playerAttributes.selectedTile = null;
@@ -552,7 +616,7 @@ function movement(currentKeysPressed) { // written up
       playerAttributes.buildMenu.open = true;
       playerAttributes.buildMenu.reset = false
 
-      let bMenu = document.getElementById("build-menu");
+      let bMenu = document.getElementById("build-menu-container");
       playerAttributes.canShoot = false;
       bMenu.style.visibility = "visible";
       threeDCursor.scale.set(1, 1, 1)
@@ -565,14 +629,80 @@ function movement(currentKeysPressed) { // written up
 
 }
 
-/*
-    if (playerAttributes.buildMenu) {
-      playerAttributes.buildMenu = false;
-    }
-    let bMenu = document.getElementById("build-menu");
-    playerAttributes.buildMenu = true;
-*/
+function craftingMenuManagement(){
+  let pMenu = playerAttributes.craftingMenu;
 
+  if(pMenu.reset == true && pMenu.open == true){
+    pMenu.open = false;
+    pMenu.reset = false;
+    
+    document.getElementById("crafting-container").style.visibility = "hidden";
+
+// turret cube stair cylinder ammo health
+
+  } else if(pMenu.reset == true && pMenu.open == false){
+    pMenu.open = true;
+    pMenu.reset = false;
+
+    document.getElementById("crafting-container").style.visibility = "visible";
+
+
+    document.getElementById("craft-1").addEventListener("click", () => {
+      console.log("craft turret")
+      if(inventoryRemove(["rock",12])){
+        inventoryAdd(["turret",1])
+      } else {
+        console.log("not crafted")
+      }
+    })
+
+
+    document.getElementById("craft-2").addEventListener("click", () => {
+      console.log("craft cube")
+      if(inventoryRemove(["rock",3])){
+        inventoryAdd(["cube",1])
+      } else {
+        console.log("crafted")
+      }
+    })
+
+
+    document.getElementById("craft-3").addEventListener("click", () => {
+      console.log("craft stair")
+      if(inventoryRemove(["rock",3])){
+        inventoryAdd(["stair",1])
+      } else {
+        console.log("crafted")
+      }
+    })
+
+
+    document.getElementById("craft-4").addEventListener("click", () => {
+      console.log("craft cylinder")
+      if(inventoryRemove(["rock",3])){
+        inventoryAdd(["cylinder",1])
+      } else {
+        console.log("crafted")
+      }
+    })
+
+
+    document.getElementById("craft-5").addEventListener("click", () => {
+      console.log("craft ammo")
+    })
+
+
+    document.getElementById("craft-6").addEventListener("click", () => {
+      console.log("craft health")
+    })
+
+
+    //
+
+    
+  }
+
+}
 
 
 function threeDCursorStuff() { // written up
@@ -671,8 +801,8 @@ function resetCollisionCheck() { // written up
   }
 }
 
-function justCheckCollisions() { // written up
-  let shitCube = playerCube.clone();
+function justCheckCollisions(input) { // written up
+  let shitCube = input.clone();
   for (
     let vertexIndex = 0;
     vertexIndex < shitCube.geometry.attributes.position.array.length;
@@ -703,8 +833,10 @@ function enemyManagement() { // written up
     let attack1 = false;
     let attack2 = false;
 
-    // move towards
+    let tempEnemyPos = enemyList[i].position.clone();
 
+    // move towards
+    // how tf do i make it go round or even recognize objects
     if (playerCube.position.x > enemyList[i].position.x) {
       if (playerCube.position.x - (enemyList[i].position.x + 0.1) > 0) {
         enemyList[i].position.x += 0.0015 + Math.floor((Math.random()-0.5)*180)/10000;
@@ -735,9 +867,45 @@ function enemyManagement() { // written up
       if (playerAttributes.health > 0) {
         playerAttributes.health -= 0.1;
         playerAttributes.health = Math.floor(playerAttributes.health * 10) / 10;
-        document.getElementById("health").style.width =
-          playerAttributes.health * 2 + "px";
+        document.getElementById("health").style.width = playerAttributes.health*0.5 + "%";
+
+        if(playerAttributes.health <= 0){
+          document.getElementById("game-over").style.visibility = "visible";
+        }
+
       }
+    }
+
+    // run collision check
+    // if colliding enemyList[i].position = tempEnemyPos.clone();
+    // else nothing
+    if(justCheckCollisions(enemyList[i])){
+      enemyList[i].position.x = tempEnemyPos.x;
+      enemyList[i].position.y = tempEnemyPos.y;
+      enemyList[i].position.z = tempEnemyPos.z;
+    } else {
+      console.log("all good heree yes siree")
+    }
+
+    for(let j = 0; j < turretList.length; j++){
+      try{
+        if(enemyList[i].position != undefined){
+          if(enemyList[i].position.distanceTo(turretList[j].position) < 1){
+            if(turretList[j].ready == true){
+                turretList[j].ready = false;
+                scene.remove(enemyList[i].geometry)
+                scene.remove(enemyList[i].material)
+                scene.remove(enemyList[i])
+                enemyList.splice(i,1)
+                setTimeout(function(){
+                    turretList[j].ready = true;
+                },500)
+            }
+          }
+        }
+      } catch(error){
+      }
+
     }
   }
   checkEnemyHit();
@@ -784,8 +952,13 @@ function animate() { // written up
       projectileList[i].position.x += projectileList[i].deltaX;
       projectileList[i].position.z += projectileList[i].deltaZ;
     }
+
+    for (let i = 0; i < turretList.length; i++){
+      turretList[i].rotation.y += Math.PI/128
+    }
     delta %= interval;
     composer.render(scene, camera);
+    // renderer.render(scene,camera)
   }
 }
 
@@ -827,8 +1000,16 @@ function tileColourReset() { // written up
 
     } else if (playerAttributes.selectedTile.name == "Mesh_detail_tree_1") {
       playerAttributes.selectedTile.material.color.set(0xf1c1a2)
+    } else if (playerAttributes.selectedTile.name == "Mesh_weapon_blaster"){
+      playerAttributes.selectedTile.material.color.set(0xa8d7e2)
+
+    } else if (playerAttributes.selectedTile.name == "Mesh_weapon_blaster_1"){
+      playerAttributes.selectedTile.material.color.set(0xd65b5b)
+    } else if (playerAttributes.selectedTile.name == "Mesh_weapon_blaster_2"){
+      playerAttributes.selectedTile.material.color.set(0x789ba3)
 
     } else {
+      
       playerAttributes.selectedTile.material.color.set(0xffffff)
     }
 
@@ -900,18 +1081,18 @@ function inventoryAdd(input){ // written up
 
   while(noSlotFound){
     if(pInv[i][0] != undefined){
-      if(pInv[i][0] == input[0]){
+      if(pInv[i][0] == input[0]){ // if the current index item = what needs to be added
         pInv[i][1] += input[1];
         noSlotFound = false;
       }
     }
     i++
-    if (i == pInv.length){
+    if (i == pInv.length){ // if cant find
       
       for(let i = 0; i < pInv.length; i++){
         
         if(pInv[i][0] == undefined){
-          pInv[i] = input;
+          pInv[i] = input; // asign to an empty slot
           noSlotFound = false;
           i = pInv.length
         }
@@ -919,6 +1100,40 @@ function inventoryAdd(input){ // written up
       noSlotFound = false;
     }
   }
+  
+}
+
+function inventoryRemove(input){
+  let pInv = playerAttributes.inventory.contents;
+  let noSlotFound = true;
+  let i = 0;
+
+  while(noSlotFound){
+    if(pInv[i][0] != undefined){
+      if(pInv[i][0] == input[0]){ // if the current index item = what needs to be added
+
+        let remainingValue = pInv[i][1] - input[1]
+
+        console.log(remainingValue)
+
+        if(remainingValue >= 0){ // if the amount of resources after removal >= 0
+          pInv[i][1] -= input[1]; // remove the resources
+          //add one to turret storage 
+          return true // can craft / place
+        } else {
+          console.log("not removed") // not enough resources to craft / place
+          return false;
+        }
+      }
+    }
+
+    i++
+
+    if (i == pInv.length){ // if cant find
+      return false; //  cant craft / place
+    }
+  }
+  
 }
 
 
