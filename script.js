@@ -24,33 +24,33 @@ let interval = 1 / 60;
 //     player: {url: "assets/models/playermodel.glb"}
 // }
 
-// const loader = new THREE.TextureLoader();
-// const tempMaterials = [
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/left.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/right.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/top.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/bottom.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/front.png") }),
-//     new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/back.png") }),
-// ];
+const loader = new THREE.TextureLoader();
+const tempMaterials = [
+    new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/left.png") }),
+    new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/right.png") }),
+    new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/top.png") }),
+    new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/bottom.png") }),
+    new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/front.png") }),
+    new THREE.MeshPhongMaterial({ map: loadColorTexture("assets/textures/back.png") }),
+];
 
-const gltfLoader = new GLTFLoader();
-// for (const model of Object.values(models)){
-//     gltfLoader.load(model.url, (gltf) => {
-//         model.gltf = gltf
-//     })
-// }
-gltfLoader.load("assets/models/playermodel.glb",
-    function(gltf){
-        gltf.scene.scale.set(0.0365,0.0365,0.0365)
-        let grah = gltf.scene
+// const gltfLoader = new GLTFLoader();
+// // for (const model of Object.values(models)){
+// //     gltfLoader.load(model.url, (gltf) => {
+// //         model.gltf = gltf
+// //     })
+// // }
+// gltfLoader.load("assets/models/playermodel.glb",
+//     function(gltf){
+//         gltf.scene.scale.set(0.0365,0.0365,0.0365)
+//         let grah = gltf.scene
         
-        playerCube.add(grah);
-        grah.rotation.y = Math.PI/2
-        grah.position.y -= 0.125;
+//         playerCube.add(grah);
+//         grah.rotation.y = Math.PI/2
+//         grah.position.y -= 0.125;
         
-    }
-)
+//     }
+// )
 
 // console.log(models.player)
 
@@ -193,11 +193,11 @@ function init() {
     // player cube
     playerCube = new THREE.Mesh(
         new THREE.BoxGeometry(0.125, 0.25, 0.125,2,2,2),
-        new THREE.MeshPhongMaterial({
-            color: 0x07ffff,
-            transparent: true,
-            opacity: 0})
-        // tempMaterials
+        // new THREE.MeshPhongMaterial({
+        //     color: 0x07ffff,
+        //     transparent: true,
+        //     opacity: 0})
+        tempMaterials
     );
     playerCube.castShadow = false;
     playerCube.position.y += 0.125
